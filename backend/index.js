@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import "dotenv/config";
 import connectDB from "./config/db.js";
+import authRouter from "./routes/auth.Router.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -12,6 +13,9 @@ app.use(express.json());
 app.get("/", (req, res) => {
   res.json({ status: "ok", message: "Backend running" });
 });
+
+
+app.use('/api/auth',authRouter)
 
 const startServer = async () => {
   try {
