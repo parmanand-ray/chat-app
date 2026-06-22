@@ -1,0 +1,10 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Talko Favicon</title>
+  <desc id="desc">Talko chat bubble favicon with real-time signal waves.</desc>
+  <rect width="64" height="64" rx="16" fill="#0F172A"/>
+  <path d="M14 22.8C14 18.4922 17.4922 15 21.8 15H40.2C44.5078 15 48 18.4922 48 22.8V33.2C48 37.5078 44.5078 41 40.2 41H33.806L25.982 47.158C25.3264 47.674 24.3636 47.2069 24.3636 46.3721V41H21.8C17.4922 41 14 37.5078 14 33.2V22.8Z" fill="#22C55E"/>
+  <circle cx="25" cy="28" r="2.8" fill="#0F172A"/>
+  <circle cx="31" cy="28" r="2.8" fill="#0F172A"/>
+  <circle cx="37" cy="28" r="2.8" fill="#0F172A"/>
+  <path d="M49.5 20C52.1667 24.6667 52.1667 31.3333 49.5 36" stroke="#38BDF8" stroke-width="4" stroke-linecap="round"/>
+</svg>
