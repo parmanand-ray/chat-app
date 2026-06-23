@@ -49,7 +49,7 @@ export const signUp = async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true,
       maxAge: 2 * 24 * 60 * 60 * 1000,
-      sameSite: "none",
+      sameSite: "lax",
       secure: false,
     });
 
@@ -60,6 +60,7 @@ export const signUp = async (req, res) => {
         _id: newUser._id,
         username: newUser.username,
         email: newUser.email,
+        image: existingUser.image,
       },
     });
   } catch (error) {
@@ -104,7 +105,7 @@ export const login = async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true,
       maxAge: 2 * 24 * 60 * 60 * 1000,
-      sameSite: "none",
+      sameSite: "lax",
       secure: false,
     });
 
@@ -115,6 +116,7 @@ export const login = async (req, res) => {
         _id: existingUser._id,
         username: existingUser.username,
         email: existingUser.email,
+        image: existingUser.image,
       },
     });
   } catch (error) {
@@ -124,13 +126,13 @@ export const login = async (req, res) => {
   }
 };
 
-export const logout = async (req, res) =>{
-try{
-  res.clearCookie("token");
-  res.status(200).json({status:true, message:"Logout Successfull"});
-}catch (error) {
+export const logout = async (req, res) => {
+  try {
+    res.clearCookie("token");
+    res.status(200).json({ status: true, message: "Logout Successfull" });
+  } catch (error) {
     res
       .status(500)
       .json({ status: false, message: `Logout Error ${error.message}` });
   }
-}
+};

@@ -1,5 +1,10 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { serverUrl } from "../main";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { useDispatch } from "react-redux";
+import { setUserData } from "../redux/userSlice";
 
 const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -9,15 +14,29 @@ const SignUp = () => {
     password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-
-  const handleSubmit = () => {
+  let dispatch = useDispatch();
+  const handleSubmit = async (e) => {
+    console.log(formData);
     e.preventDefault();
-    if (loading) return;
-
-    setLoading(true);
+    if (isLoading) return;
+    setIsLoading(true);
 
     try {
-    } catch (error) {}
+      let result = await axios.post(`${serverUrl}/api/auth/signup`, formData, {
+        withCredentials: true,
+      });
+      dispatch(setUserData(result.data.user));
+      toast.success(result.data.message);
+      setFormData({
+        username: "",
+        email: "",
+        password: "",
+      });
+    } catch (error) {
+      toast.error(error?.response?.data?.message || error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -38,7 +57,11 @@ const SignUp = () => {
           </div>
         </div>
 
-        <form className="w-full flex flex-col items-center gap-5 px-5 py-8">
+        <form
+          method="post"
+          className="w-full flex flex-col items-center gap-5 px-5 py-8"
+          onSubmit={handleSubmit}
+        >
           <div className="w-full space-y-4">
             <div className="space-y-2">
               <label
@@ -93,6 +116,13 @@ const SignUp = () => {
                   type={showPassword ? "text" : "password"}
                   name="password"
                   id="password"
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      password: e.target.value,
+                    })
+                  }
                   placeholder="Create a strong password"
                   className="w-full h-[50px] outline-none border-2 border-[#8edfd1] focus:border-[#00dcb8] pl-5 pr-12 py-2 bg-white rounded-lg shadow-md shadow-gray-200 text-gray-800 placeholder:text-gray-400"
                 />
@@ -144,10 +174,11 @@ const SignUp = () => {
           </div>
 
           <button
+            disabled={isLoading}
             type="submit"
             className="w-full h-[50px] bg-[#00dcb8] hover:bg-[#00c4a4] text-white font-bold rounded-lg shadow-md transition-all"
           >
-            Create Account
+            {isLoading ? "Please Wait..." : "Create Account"}
           </button>
 
           <p className="text-sm font-medium text-gray-600">

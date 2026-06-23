@@ -4,19 +4,26 @@ import "dotenv/config";
 import connectDB from "./config/db.js";
 import authRouter from "./routes/auth.Router.js";
 import cookieParser from "cookie-parser";
+import userRouter from "./routes/user.Routes.js";
+import isAuth from "./middlewares/isAuth.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  }),
+);
 app.use(express.json());
-app.use(cookieParser())
+app.use(cookieParser());
 app.get("/", (req, res) => {
   res.json({ status: "ok", message: "Backend running" });
 });
 
-
-app.use('/api/auth',authRouter)
+app.use("/api/auth", authRouter);
+app.use("/api/user",isAuth, userRouter);
 
 const startServer = async () => {
   try {
