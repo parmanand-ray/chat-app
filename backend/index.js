@@ -6,6 +6,7 @@ import authRouter from "./routes/auth.Router.js";
 import cookieParser from "cookie-parser";
 import userRouter from "./routes/user.Routes.js";
 import isAuth from "./middlewares/isAuth.js";
+import uploadOnCloude from "./config/cloudinary.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,7 +24,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", authRouter);
-app.use("/api/user",isAuth, userRouter);
+app.use("/api/user", isAuth, userRouter);
 
 const startServer = async () => {
   try {
@@ -33,7 +34,7 @@ const startServer = async () => {
       "Continuing without database connection. Fix MONGODB_URL or network access to mongodb.net.",
     );
   }
-
+  // uploadOnCloude("https://www.aftfixing.com/uploaded-files/category/images/thumbs/anchor-rods-thumbs-400x400-v1770727137.webp");
   app.listen(PORT, () => {
     // eslint-disable-next-line no-console
     console.log(`Server listening on http://localhost:${PORT}`);

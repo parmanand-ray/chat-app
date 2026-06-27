@@ -19,6 +19,6 @@ const getCurrentUser = () => {
       }
     };
     fetchUser();
-  }, [userData]);
+  }, [dispatch]);
 };
 export default getCurrentUser;
