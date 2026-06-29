@@ -5,10 +5,17 @@ import getCurrentUser from "./costomHooks/getCurrectUser";
 import { useSelector } from "react-redux";
 import Home from "./pages/Home";
 import Profile from "./pages/Profile";
+import getAllusers from "./costomHooks/getAllusers";
 
 function App() {
   getCurrentUser();
-  let { userData } = useSelector((state) => state.user);
+  getAllusers();
+
+  const { userData, loading } = useSelector((state) => state.user);
+
+  if (loading) {
+    return <h1>Loading...</h1>;
+  }
   return (
     <Routes>
       <Route

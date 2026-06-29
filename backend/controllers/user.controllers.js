@@ -57,16 +57,34 @@ export const editProfile = async (req, res) => {
       runValidators: true,
     }).select("-password");
 
-    res
-      .status(200)
-      .json({
-        status: true,
-        message: "Profile Updated Successfully",
-        user: updatedUser,
-      });
+    res.status(200).json({
+      status: true,
+      message: "Profile Updated Successfully",
+      user: updatedUser,
+    });
   } catch (error) {
     res
       .status(500)
       .json({ status: false, message: `Update Error : ${error.message}` });
+  }
+};
+
+export const getAllUser = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const allUser = await User.find({ _id: { $ne: userId } }).select(
+      "-password",
+    );
+    if (!allUser) {
+      return res
+        .status(404)
+        .json({ status: false, message: "Can not find User" });
+    }
+    res.status(200).json({ status: true, user: allUser });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ status: false, message: `All User Error ${error.message}` });
   }
 };

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { serverUrl } from "../main";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -14,6 +14,7 @@ const Login = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   let dispatch = useDispatch();
+  let navigate = useNavigate();
   const handleSubmit = async (e) => {
     console.log(formData);
     e.preventDefault();
@@ -25,6 +26,7 @@ const Login = () => {
         withCredentials: true,
       });
       dispatch(setUserData(result.data.user));
+      navigate("/");
 
       toast.success(result.data.message);
       setFormData({
