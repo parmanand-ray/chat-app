@@ -78,13 +78,13 @@ const Profile = () => {
 
   return (
     <div className="w-full min-h-screen bg-slate-300 flex flex-col items-center justify-center px-4">
-      <Link
-        to="/"
-        className="fixed top-5 left-5 z-50 inline-flex items-center gap-2 rounded-full bg-black/70 px-4 py-2 text-sm font-medium text-white backdrop-blur-md transition-all duration-200 hover:bg-black"
-      >
-        <FaLongArrowAltLeft size={18} />
-        <span>Go Home</span>
-      </Link>
+            <Link
+              to="/"
+              className="fixed top-5 left-5 z-50 inline-flex items-center gap-2 rounded-full bg-black/70 px-4 py-2 text-sm font-medium text-white backdrop-blur-md transition-all duration-200 hover:bg-black"
+            >
+              <FaLongArrowAltLeft size={18} />
+              <span>Go Home</span>
+            </Link>
 
       <button
         onClick={handleLogout}

@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import userRouter from "./routes/user.Routes.js";
 import isAuth from "./middlewares/isAuth.js";
 import uploadOnCloude from "./config/cloudinary.js";
+import messageRouter from "./routes/message.Router.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,6 +26,8 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRouter);
 app.use("/api/user", isAuth, userRouter);
+app.use("/api/message", isAuth, messageRouter);
+
 
 const startServer = async () => {
   try {

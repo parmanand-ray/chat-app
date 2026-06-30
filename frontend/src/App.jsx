@@ -11,11 +11,9 @@ function App() {
   getCurrentUser();
   getAllusers();
 
-  const { userData, loading } = useSelector((state) => state.user);
+  const { userData } = useSelector((state) => state.user);
 
-  if (loading) {
-    return <h1>Loading...</h1>;
-  }
+
   return (
     <Routes>
       <Route
