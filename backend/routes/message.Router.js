@@ -2,7 +2,7 @@ import express from "express";
 
 import isAuth from "../middlewares/isAuth.js";
 import { upload } from "../middlewares/multer.js";
-import { getMessages } from "../controllers/message.controllers.js";
+import { getMessages, sendMessage } from "../controllers/message.controllers.js";
 
 const messageRouter = express.Router();
 

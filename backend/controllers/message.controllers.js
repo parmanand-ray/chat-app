@@ -1,6 +1,6 @@
-import uploadOnCloude from "../config/cloudinary";
-import Conversation from "../models/conversation.model";
-import Message from "../models/message.model";
+import uploadOnCloude from "../config/cloudinary.js";
+import Conversation from "../models/conversation.model.js";
+import Message from "../models/message.model.js";
 
 export const sendMessage = async (req, res) => {
   try {
@@ -81,17 +81,15 @@ export const getMessages = async (req, res) => {
       });
     }
 
-    let conversation = await Conversation.find({
+    let conversation = await Conversation.findOne({
       participants: { $all: [sender, receiver] },
     }).populate("messages");
 
     if (!conversation) {
-      return res
-        .status(400)
-        .json({ status: false, message: "No Chats Found!" });
+      return res.status(200).json([]);
     }
 
-    return res.status(200).json(conversation?.messages);
+    return res.status(200).json(conversation.messages || []);
   } catch (error) {
     return res.status(500).json({
       status: false,
