@@ -16,12 +16,14 @@ import axios from "axios";
 import { serverUrl } from "../main";
 import { toast } from "react-toastify";
 import { setMessages } from "../redux/messageSlice";
+import { useEffect } from "react";
 function MessageArea() {
   const image = useRef();
 
-  let { selectedUser, userData } = useSelector((state) => state.user);
+  let { selectedUser, userData, socket } = useSelector((state) => state.user);
   const [emoji, setEmoji] = useState(false);
   let [input, setInput] = useState("");
+  let [loading, setLoading] = useState(false);
   let dispatch = useDispatch();
   const onEmojiClick = (emojiData) => {
     setInput((prev) => prev + emojiData.emoji);
@@ -43,6 +45,7 @@ function MessageArea() {
     if (!input.trim() && !backendImage) return;
 
     try {
+      setLoading(true);
       let formData = new FormData();
       formData.append("message", input);
 
@@ -66,13 +69,22 @@ function MessageArea() {
         dispatch(setMessages([...messages, newMessage]));
       }
 
-      setBackendImage(null);
-      setFrontendImage(null);
+      setBackendImage("");
+      setFrontendImage("");
       setInput("");
+      setLoading(false);
     } catch (error) {
       console.log(error);
+      setLoading(false);
     }
   };
+
+  useEffect(() => {
+    socket.on("newMessage", (msg) => {
+      dispatch(setMessages([...messages, msg]));
+    });
+    return () => socket.off("newMessage");
+  }, [messages, setMessages]);
 
   if (!selectedUser) {
     return (
@@ -118,7 +130,7 @@ function MessageArea() {
 
       {/* Message Area */}
 
-      <div className="relative w-full h-[73vh] lg:h-[760px] flex flex-col py-[30px] px-[20px] overflow-auto no-scrollbar">
+      <div className="relative w-full h-[83vh]  flex flex-col py-[50px] px-[20px] overflow-auto no-scrollbar">
         {(messages || []).filter(Boolean).map((msg) => {
           const isSender = msg?.sender === userData?._id;
 
@@ -127,12 +139,14 @@ function MessageArea() {
               key={msg?._id || Math.random()}
               image={msg?.image}
               message={msg?.message}
+              time={msg?.createdAt}
             />
           ) : (
             <ReceiverMessage
               key={msg?._id || Math.random()}
               image={msg?.image}
               message={msg?.message}
+              time={msg?.createdAt}
             />
           );
         })}
@@ -197,13 +211,20 @@ function MessageArea() {
             <FaImages className="h-[25px] w-[25px]  text-white/70" />
           </div>
           <button
-            type="submit"
-            className=" rounded-full w-[40px] h-[40px] bg-white shrink-0 hover:bg-white/70 transition-all  cursor-pointer flex justify-center items-center"
+            disabled={loading || (!input.trim() && !backendImage)}
+              type="submit"
+            className={`rounded-full w-[40px] h-[40px] bg-white shrink-0 hover:bg-white/70 transition-all flex justify-center items-center ${
+              loading ? "cursor-not-allowed opacity-70" : "cursor-pointer"
+            }`}
           >
-            <MdSend
-              className=" p-1 hover:text-black text-black/70 transition-all"
-              size={30}
-            />
+            {loading ? (
+              <span className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"></span>
+            ) : (
+              <MdSend
+                className="p-1 hover:text-black text-black/70 transition-all"
+                size={30}
+              />
+            )}
           </button>
         </form>
       </div>

@@ -8,8 +8,9 @@ import userRouter from "./routes/user.Routes.js";
 import isAuth from "./middlewares/isAuth.js";
 import uploadOnCloude from "./config/cloudinary.js";
 import messageRouter from "./routes/message.Router.js";
+import { app, server } from "./socket/socket.js";
 
-const app = express();
+
 const PORT = process.env.PORT || 3000;
 
 app.use(
@@ -38,7 +39,7 @@ const startServer = async () => {
     );
   }
   // uploadOnCloude("https://www.aftfixing.com/uploaded-files/category/images/thumbs/anchor-rods-thumbs-400x400-v1770727137.webp");
-  app.listen(PORT, () => {
+  server.listen(PORT, () => {
     // eslint-disable-next-line no-console
     console.log(`Server listening on http://localhost:${PORT}`);
   });

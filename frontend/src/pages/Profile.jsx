@@ -101,8 +101,11 @@ const Profile = () => {
         onSubmit={handleUpdate}
       >
         {/* image */}
-        <div className="relative bg-white rounded-full border-4 border-[#00dcb8] shadow-lg shadow-gray-400">
+        <div className="relative bg-white rounded-full border-4 border-[#00dcb8] shadow-lg  shadow-gray-400" >
           <div className="w-[200px] h-[200px] rounded-full overflow-hidden">
+
+
+            
             <img
               src={preview}
               alt="profile"

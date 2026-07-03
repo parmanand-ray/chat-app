@@ -4,7 +4,7 @@ import { serverUrl } from "../main";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
-import { setUserData } from "../redux/userSlice";
+import { setSelectedUser, setUserData } from "../redux/userSlice";
 
 const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -27,6 +27,8 @@ const SignUp = () => {
         withCredentials: true,
       });
       dispatch(setUserData(result.data.user));
+      dispatch(setSelectedUser(null));
+
       navigate("/profile");
       toast.success(result.data.message);
       setFormData({

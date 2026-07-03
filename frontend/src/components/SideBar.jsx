@@ -9,8 +9,10 @@ import { useNavigate } from "react-router-dom";
 import { setAllUser, setSelectedUser, setUserData } from "../redux/userSlice";
 
 function Sidebar() {
-  const { userData, allUsers,selectedUser } = useSelector((state) => state.user);
-   
+  const { userData, allUsers, selectedUser, onlineUsers } = useSelector(
+    (state) => state.user,
+  );
+
   const users = allUsers || [];
 
   const navigate = useNavigate();
@@ -36,7 +38,9 @@ function Sidebar() {
     }
   };
   return (
-    <div className={`lg:w-[30%] w-full h-screen bg-gray-100 overflow-y-auto ${selectedUser ? 'hidden' : 'block'} lg:block`}>
+    <div
+      className={`lg:w-[30%] w-full h-screen bg-gray-100 overflow-y-auto ${selectedUser ? "hidden" : "block"} lg:block no-scrollbar`}
+    >
       {/* Header */}
 
       <div className=" bg-[#292b2a] rounded-b-[50%] h-[150px] px-8 py-8 shadow-lg ">
@@ -56,8 +60,9 @@ function Sidebar() {
           </div>
 
           <img
+            onClick={() => navigate("/profile")}
             src={userData?.image || "no-image.jpg"}
-            className=" w-[90px] h-[90px] rounded-full border-4 border-green-400 object-cover "
+            className=" w-[90px] h-[90px] rounded-full border-4 cursor-pointer border-green-400 object-cover "
           />
         </div>
       </div>
@@ -73,34 +78,36 @@ function Sidebar() {
             el.scrollLeft += e.deltaY;
           }
         }}
-        className="flex gap-5 px-1 md:px-5  mt-2 overflow-x-auto no-scrollbar"
+        className="flex gap-5 px-1 md:px-5  mt-2 overflow-x-auto no-scrollbar sticky top-14.5 z-20 bg-gray-100"
       >
-        {users?.map((user) => (
-          <div
-            key={user?.name || user?.username}
-            className="flex flex-col items-center min-w-[90px]"
-            onClick={() => dispatch(setSelectedUser(user))}
-          >
-            <div className="relative">
-              <img
-                src={user?.image || "no-image.jpg"}
-                className=" w-[80px] h-[80px] rounded-full object-cover border-4 border-white shadow "
-              />
+        {users
+          ?.filter((user) => onlineUsers?.includes(user._id))
+          ?.map((user) => (
+            <div
+              key={user?.name || user?.username}
+              className="flex flex-col items-center min-w-[90px] cursor-pointer"
+              onClick={() => dispatch(setSelectedUser(user))}
+            >
+              <div className="relative">
+                <img
+                  src={user?.image || "no-image.jpg"}
+                  className=" w-[80px] h-[80px] rounded-full object-cover border-4 border-white shadow "
+                />
 
-              <span className=" absolute right-1 bottom-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white "></span>
+                <span className=" absolute right-1 bottom-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white "></span>
+              </div>
+
+              <p className="mt-0.5 font-semibold text-sm text-center capitalize">
+                {(user?.name || user?.username).toLowerCase()}
+              </p>
             </div>
-
-            <p className="mt-0.5 font-semibold text-sm text-center capitalize">
-              {(user?.name || user?.username).toLowerCase()}
-            </p>
-          </div>
-        ))}
+          ))}
       </div>
 
       {/* Search */}
 
-      <div className=" px-5 mt-1 flex gap-3 ">
-        <div className=" bg-white flex items-center gap-3 rounded-full px-5 h-[55px] flex-1 shadow ">
+      <div className="px-5 mt-1 flex gap-3 sticky top-1 z-20 bg-gray-100">
+        <div className=" bg-white flex items-center gap-3 mb-1 rounded-full px-5 h-[55px] flex-1 shadow ">
           <MdSearch size={28} />
 
           <input
@@ -116,24 +123,28 @@ function Sidebar() {
 
       {/* Online Users */}
 
-      <div className="px-5 mt-2">
+      <div className="px-5 mt-2 ">
         <h2 className=" text-2xl font-bold flex items-center gap-3 ">
           <span className=" w-4 h-4 bg-green-500 rounded-full " />
           Online Users
         </h2>
 
-        <div className="mt-5 space-y-4 max-h-[540px] mb-1 overflow-y-auto no-scrollbar">
+        <div className="mt-5 space-y-4 max-h-[70%] mb-1 overflow-y-auto no-scrollbar">
           {users.map((user) => (
             <div
               key={user?.name || user?.username}
               className=" bg-white rounded-2xl p-4 flex items-center gap-4 shadow hover:bg-gray-200 transition-all"
               onClick={() => dispatch(setSelectedUser(user))}
             >
-              <img
-                src={user?.image || "no-image.jpg"}
-                className=" w-[55px] h-[55px] rounded-full object-cover "
-              />
-
+              <div className="relative">
+                <img
+                  src={user?.image || "no-image.jpg"}
+                  className=" w-[55px] h-[55px] rounded-full object-cover "
+                />
+                {onlineUsers?.includes(user._id) && (
+                  <span className=" absolute right-0 bottom-0.5 w-5 h-5 bg-green-500 rounded-full border-2 border-white "></span>
+                )}
+              </div>
               <div>
                 <h3 className="font-bold text-lg capitalize">
                   {(user?.name || user?.username).toLowerCase()}
