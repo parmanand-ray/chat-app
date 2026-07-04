@@ -6,7 +6,7 @@ import { ToastContainer } from "react-toastify";
 import { store } from "./redux/store.js";
 import { Provider } from "react-redux";
 
-export const serverUrl = "http://localhost:3000";
+export const serverUrl = "https://chat-app-8qz5.onrender.com";
 createRoot(document.getElementById("root")).render(
   <BrowserRouter>
     <ToastContainer position="top-right" autoClose={3000} theme="light" />
