@@ -5,17 +5,30 @@ import getCurrentUser from "./costomHooks/getCurrectUser";
 import { useDispatch, useSelector } from "react-redux";
 import Home from "./pages/Home";
 import Profile from "./pages/Profile";
+import Admin from "./pages/Admin";
 import getAllusers from "./costomHooks/getAllusers";
 import { io } from "socket.io-client";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { serverUrl } from "./main";
-import { setOnlineUsers, setSocket } from "./redux/userSlice";
+import {
+  setOnlineUsers,
+  setSocket,
+  updateUserLastMessage,
+} from "./redux/userSlice";
 function App() {
   getCurrentUser();
   getAllusers();
 
-  const { userData, socket, onlineUsers } = useSelector((state) => state.user);
+  const { userData, socket, onlineUsers, selectedUser } = useSelector(
+    (state) => state.user,
+  );
   let dispatch = useDispatch();
+  const selectedUserRef = useRef(selectedUser);
+
+  useEffect(() => {
+    selectedUserRef.current = selectedUser;
+  }, [selectedUser]);
+
   useEffect(() => {
     if (userData) {
       const socketio = io(`${serverUrl}`, {
@@ -28,11 +41,39 @@ function App() {
         dispatch(setOnlineUsers(users));
       });
 
-      return () => socketio.close("getOnlineUesrs");
-    }else{
-      if(socket){
+      socketio.on("conversationUpdated", (data) => {
+        const isChatOpen =
+          String(data.userId) === String(selectedUserRef.current?._id);
+
+        dispatch(
+          updateUserLastMessage({
+            userId: data.userId,
+            lastMessage: data.lastMessage,
+            lastMessageAt: data.lastMessageAt,
+            unreadCount: isChatOpen ? 0 : data.unreadCount,
+          }),
+        );
+      });
+
+      socketio.on("messagesRead", (data) => {
+        dispatch(
+          updateUserLastMessage({
+            userId: data.userId,
+            unreadCount: data.unreadCount ?? 0,
+          }),
+        );
+      });
+
+      return () => {
+        socketio.off("getOnlineUesrs");
+        socketio.off("conversationUpdated");
+        socketio.off("messagesRead");
+        socketio.close();
+      };
+    } else {
+      if (socket) {
         socket.close();
-        dispatch(setSocket(null))
+        dispatch(setSocket(null));
       }
     }
   }, [userData]);
@@ -47,6 +88,16 @@ function App() {
       <Route
         path="/profile"
         element={userData ? <Profile /> : <Navigate to="/signup" />}
+      />
+      <Route
+        path="/admin"
+        element={
+          userData?.role === "admin" ? (
+            <Admin />
+          ) : (
+            <Navigate to={userData ? "/" : "/login"} />
+          )
+        }
       />
       <Route
         path="/signup"

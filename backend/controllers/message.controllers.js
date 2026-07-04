@@ -45,28 +45,50 @@ export const sendMessage = async (req, res) => {
       participants: { $all: [sender, receiver] },
     });
 
-    let msg = await newMessage.save();
+    const savedMessage = await newMessage.save();
 
     if (!conversation) {
       conversation = await Conversation.create({
         participants: [sender, receiver],
-        messages: [msg._id],
+        messages: [savedMessage._id],
+        lastMessage: savedMessage._id,
       });
     } else {
-      conversation.messages.push(msg._id);
+      conversation.messages.push(savedMessage._id);
+      conversation.lastMessage = savedMessage._id;
       await conversation.save();
     }
 
     const receiverSocketId = getReceiverSocketId(receiver);
+    const senderSocketId = getReceiverSocketId(sender);
 
     if (receiverSocketId) {
-      io.to(receiverSocketId).emit("newMessage", msg);
+      const unreadCount = await Message.countDocuments({
+        sender,
+        receiver,
+        isRead: false,
+      });
+      io.to(receiverSocketId).emit("newMessage", savedMessage);
+      io.to(receiverSocketId).emit("conversationUpdated", {
+        userId: sender,
+        lastMessage: savedMessage,
+        lastMessageAt: savedMessage.createdAt,
+        unreadCount,
+      });
+    }
+
+    if (senderSocketId) {
+      io.to(senderSocketId).emit("conversationUpdated", {
+        userId: receiver,
+        lastMessage: savedMessage,
+        lastMessageAt: savedMessage.createdAt,
+      });
     }
 
     return res.status(201).json({
       status: true,
       message: "Message sent successfully",
-      data: msg,
+      data: savedMessage,
     });
   } catch (error) {
     return res.status(500).json({
@@ -88,15 +110,37 @@ export const getMessages = async (req, res) => {
       });
     }
 
-    let conversation = await Conversation.findOne({
-      participants: { $all: [sender, receiver] },
-    }).populate("messages");
+    const messages = await Message.find({
+      $or: [
+        { sender, receiver },
+        { sender: receiver, receiver: sender },
+      ],
+    }).sort({ createdAt: 1 });
 
-    if (!conversation) {
-      return res.status(200).json([]);
+    const unreadResult = await Message.updateMany(
+      {
+        sender: receiver,
+        receiver: sender,
+        isRead: false,
+      },
+      {
+        isRead: true,
+        readAt: new Date(),
+      },
+    );
+
+    if (unreadResult.modifiedCount > 0) {
+      const partnerSocketId = getReceiverSocketId(receiver);
+      if (partnerSocketId) {
+        io.to(partnerSocketId).emit("messagesRead", {
+          userId: sender,
+          receiver,
+          unreadCount: 0,
+        });
+      }
     }
 
-    return res.status(200).json(conversation.messages || []);
+    return res.status(200).json(messages);
   } catch (error) {
     return res.status(500).json({
       status: false,

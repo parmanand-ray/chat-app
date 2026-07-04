@@ -5,11 +5,11 @@ import connectDB from "./config/db.js";
 import authRouter from "./routes/auth.Router.js";
 import cookieParser from "cookie-parser";
 import userRouter from "./routes/user.Routes.js";
+import adminRouter from "./routes/admin.Routes.js";
 import isAuth from "./middlewares/isAuth.js";
 import uploadOnCloude from "./config/cloudinary.js";
 import messageRouter from "./routes/message.Router.js";
 import { app, server } from "./socket/socket.js";
-
 
 const PORT = process.env.PORT || 3000;
 
@@ -28,7 +28,18 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/user", isAuth, userRouter);
 app.use("/api/message", isAuth, messageRouter);
+app.use("/api/admin", adminRouter);
 
+app.use((err, req, res, next) => {
+  if (res.headersSent) {
+    return next(err);
+  }
+  const status = err.status || 400;
+  return res.status(status).json({
+    status: false,
+    message: err.message || "Something went wrong",
+  });
+});
 
 const startServer = async () => {
   try {

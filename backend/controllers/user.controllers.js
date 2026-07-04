@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import User from "../models/user.model.js";
+import Conversation from "../models/conversation.model.js";
+import Message from "../models/message.model.js";
 import uploadOnCloude from "../config/cloudinary.js";
 
 export const getCurrentUser = async (req, res) => {
@@ -53,7 +55,7 @@ export const editProfile = async (req, res) => {
     }
 
     const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
-      new: true,
+      returnDocument: "after",
       runValidators: true,
     }).select("-password");
 
@@ -76,12 +78,62 @@ export const getAllUser = async (req, res) => {
     const allUser = await User.find({ _id: { $ne: userId } }).select(
       "-password",
     );
-    if (!allUser) {
-      return res
-        .status(404)
-        .json({ status: false, message: "Can not find User" });
-    }
-    res.status(200).json({ status: true, user: allUser });
+
+    const conversations = await Conversation.find({
+      participants: userId,
+    })
+      .populate("lastMessage")
+      .sort({ updatedAt: -1 });
+
+    const unreadCounts = await Message.aggregate([
+      {
+        $match: {
+          receiver: new mongoose.Types.ObjectId(userId),
+          isRead: false,
+        },
+      },
+      {
+        $group: {
+          _id: "$sender",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const unreadMap = new Map(
+      unreadCounts.map((item) => [item._id.toString(), item.count]),
+    );
+
+    const conversationMap = new Map();
+    conversations.forEach((conversation) => {
+      const otherUserId = conversation.participants.find(
+        (id) => id.toString() !== userId.toString(),
+      );
+      if (otherUserId) {
+        conversationMap.set(otherUserId.toString(), {
+          lastMessage: conversation.lastMessage,
+          lastMessageAt:
+            conversation.lastMessage?.createdAt || conversation.updatedAt,
+          unreadCount: unreadMap.get(otherUserId.toString()) || 0,
+        });
+      }
+    });
+
+    const usersWithLastMessage = allUser
+      .map((user) => {
+        const chatData = conversationMap.get(user._id.toString());
+        return {
+          ...user.toObject(),
+          lastMessage: chatData?.lastMessage || null,
+          lastMessageAt: chatData?.lastMessageAt || null,
+          unreadCount: chatData?.unreadCount || 0,
+        };
+      })
+      .sort((a, b) => {
+        return new Date(b.lastMessageAt || 0) - new Date(a.lastMessageAt || 0);
+      });
+
+    res.status(200).json({ status: true, user: usersWithLastMessage });
   } catch (error) {
     res
       .status(500)

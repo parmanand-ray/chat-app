@@ -14,11 +14,19 @@ const MessageSchema = mongoose.Schema(
     },
     message: {
       type: String,
-      default:""
+      default: "",
     },
     image: {
       type: String,
-       default:""
+      default: "",
+    },
+    isRead: {
+      type: Boolean,
+      default: false,
+    },
+    readAt: {
+      type: Date,
+      default: null,
     },
   },
   { timestamps: true },
